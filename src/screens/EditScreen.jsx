@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
   ScrollView,
   StyleSheet,
@@ -30,16 +31,16 @@ const EditScreen = ({ route }) => {
 
   useEffect(() => {
     if (route?.params?.task) {
-      setUpdatedTask((prevState) => ({
-        ...prevState,
+      setUpdatedTask({
         ...route?.params?.task,
-        startTime: route?.params?.task?.startDate, // Set time from startDate
-        dueTime: route?.params?.task?.dueDate, // Set time from dueDate
-      }));
+        startTime: route?.params?.task?.startDate,
+        dueTime: route?.params?.task?.dueDate,
+        latitude: route?.params?.task?.location?.latitude,
+        longitude: route?.params?.task?.location?.longitude,
+      });
     }
   }, [route?.params?.task]);
 
-  // Function to handle input change
   const handleInputChange = (field, value) => {
     setUpdatedTask((prevState) => ({
       ...prevState,
@@ -65,9 +66,42 @@ const EditScreen = ({ route }) => {
 
   // Function to combine date and time for saving
   const handleSave = () => {
+    const {
+      name,
+      description,
+      status,
+      priority,
+      startDate,
+      dueDate,
+      latitude,
+      longitude,
+    } = updatedTask;
+
+    if (
+      !name ||
+      !description ||
+      !status ||
+      !priority ||
+      !startDate ||
+      !dueDate ||
+      !latitude ||
+      !longitude
+    ) {
+      Alert.alert("Error", "Please fill in all fields before saving.");
+      return;
+    }
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      Alert.alert("Error", "Invalid latitude or longitude values.");
+      return;
+    }
+
     setUpdatedTask((prevTask) => {
       const updatedTask = {
-        ...prevTask,
+        name: prevTask?.name,
+        description: prevTask?.description,
+        status: prevTask?.status,
+        priority: prevTask?.priority,
         startDate: prevTask.startDate
           ? moment(prevTask.startDate).format("YYYY-MM-DD") +
             "T" +
@@ -78,6 +112,10 @@ const EditScreen = ({ route }) => {
             "T" +
             moment(prevTask.dueTime).format("HH:mm:ss")
           : prevTask.dueDate,
+        location: {
+          latitude: prevTask.latitude,
+          longitude: prevTask.longitude,
+        },
       };
 
       const index = taskList.findIndex((item) => item.id === prevTask.id);
@@ -238,9 +276,25 @@ const EditScreen = ({ route }) => {
           />
         )}
 
+        <Text style={styles.label}>Latitude</Text>
+        <TextInput
+          style={styles.inputField}
+          value={updatedTask?.latitude}
+          onChangeText={(text) => handleInputChange("latitude", text)}
+          keyboardType="numeric"
+        />
+        <Text style={styles.label}>Longitude</Text>
+        <TextInput
+          style={styles.inputField}
+          value={updatedTask?.longitude}
+          onChangeText={(text) => handleInputChange("longitude", text)}
+          keyboardType="numeric"
+        />
         <TouchableOpacity onPress={handleSave} style={styles.button}>
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>
+
+        <View style={styles.paddingBottom} />
       </ScrollView>
     </>
   );
@@ -285,6 +339,10 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontWeight: "bold",
+  },
+  paddingBottom: {
+    width: "100%",
+    height: 50,
   },
 });
 

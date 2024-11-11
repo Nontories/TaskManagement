@@ -68,7 +68,7 @@ const DetailInfor = ({ task, handleDeleteTask }) => {
         <Text style={styles.textValue}>{task?.location?.latitude}</Text>
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.textTitle}>Latitude:</Text>
+        <Text style={styles.textTitle}>Longitude:</Text>
         <Text style={styles.textValue}>{task?.location?.longitude}</Text>
       </View>
       <View style={styles.textContainer}>

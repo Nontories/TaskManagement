@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Button,
   Platform,
   ScrollView,
@@ -30,7 +31,9 @@ const CreateScreen = () => {
     status: "Pending",
     priority: "Low",
     startDate: moment().toISOString(), // Current date and time
-    dueDate: moment().add(1, "days").toISOString(), // Next day
+    dueDate: moment().add(1, "days").toISOString(),
+    latitude: "",
+    longitude: "",
   });
 
   useFocusEffect(
@@ -81,9 +84,43 @@ const CreateScreen = () => {
   };
 
   const handleSave = () => {
+    const {
+      name,
+      description,
+      status,
+      priority,
+      startDate,
+      dueDate,
+      latitude,
+      longitude,
+    } = updatedTask;
+    console.log(updatedTask);
+
+    if (
+      !name ||
+      !description ||
+      !status ||
+      !priority ||
+      !startDate ||
+      !dueDate ||
+      !latitude ||
+      !longitude
+    ) {
+      Alert.alert("Error", "Please fill in all fields before saving.");
+      return;
+    }
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      Alert.alert("Error", "Invalid latitude or longitude values.");
+      return;
+    }
+
     setUpdatedTask((prevTask) => {
       const updatedTask = {
-        ...prevTask,
+        name: prevTask?.name,
+        description: prevTask?.description,
+        status: prevTask?.status,
+        priority: prevTask?.priority,
         startDate: prevTask.startDate
           ? moment(prevTask.startDate).format("YYYY-MM-DD") +
             "T" +
@@ -94,6 +131,10 @@ const CreateScreen = () => {
             "T" +
             moment(prevTask.dueTime).format("HH:mm:ss")
           : prevTask.dueDate,
+        location: {
+          latitude: prevTask.latitude,
+          longitude: prevTask.longitude,
+        },
       };
 
       createTask(taskList, updatedTask);
@@ -239,9 +280,26 @@ const CreateScreen = () => {
           />
         )}
 
+        <Text style={styles.label}>Latitude</Text>
+        <TextInput
+          style={styles.inputField}
+          value={updatedTask?.latitude}
+          onChangeText={(text) => handleInputChange("latitude", text)}
+          keyboardType="numeric"
+        />
+
+        <Text style={styles.label}>Longitude</Text>
+        <TextInput
+          style={styles.inputField}
+          value={updatedTask?.longitude}
+          onChangeText={(text) => handleInputChange("longitude", text)}
+          keyboardType="numeric"
+        />
+
         <TouchableOpacity onPress={handleSave} style={styles.button}>
           <Text style={styles.buttonText}>Create</Text>
         </TouchableOpacity>
+        <View style={styles.paddingBottom} />
       </ScrollView>
     </>
   );
@@ -287,6 +345,10 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontWeight: "bold",
+  },
+  paddingBottom: {
+    width: "100%",
+    height: 50,
   },
 });
 
